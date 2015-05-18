@@ -6,7 +6,7 @@ Playing around with "The _Countdown_ problem" (pearl number 20) from _Pearls of 
 
 * Type in all 5 versions of the Haskell code from the book
     * ~~countdown1~~
-    * countdown2
+    * ~~countdown2~~
     * countdown3
     * countdown4
     * countdown5
