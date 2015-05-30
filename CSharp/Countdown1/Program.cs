@@ -36,6 +36,11 @@ namespace Countdown1
             {
                 return _value;
             }
+
+            public override string ToString()
+            {
+                return Convert.ToString(_value);
+            }
         };
 
         private class App : Expr
@@ -54,6 +59,19 @@ namespace Countdown1
             public override Value Value()
             {
                 return Apply(_op, _e1.Value(), _e2.Value());
+            }
+
+            private readonly static IDictionary<Op, string> OpsToSymbols = new Dictionary<Op, string>
+            {
+                {Op.Add, "+"},
+                {Op.Sub, "-"},
+                {Op.Mul, "*"},
+                {Op.Div, "/"}
+            };
+
+            public override string ToString()
+            {
+                return string.Format("({0}{1}{2})", _e1, OpsToSymbols[_op], _e2);
             }
         };
 
@@ -192,9 +210,8 @@ namespace Countdown1
         private static void Main()
         {
             var numbers = new[] { 1, 3, 7, 10, 25, 50 };
-            Console.WriteLine("SubSeqs(numbers).SelectMany(MkExpr).Count(): {0}", SubSeqs(numbers).SelectMany(MkExpr).Count());
             var answer = Countdown(832, numbers);
-            Console.WriteLine("answer: {0}", answer);
+            Console.WriteLine("{0} = {1}", answer.Item1, answer.Item2);
         }
     }
 }

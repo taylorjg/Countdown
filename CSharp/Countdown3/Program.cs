@@ -4,7 +4,7 @@ using System.Linq;
 
 // ReSharper disable PossibleMultipleEnumeration
 
-namespace Countdown2
+namespace Countdown3
 {
     using Value = Int32;
 
@@ -50,6 +50,11 @@ namespace Countdown2
                 _e2 = e2;
             }
 
+            public Op Op
+            {
+                get { return _op; }
+            }
+
             private readonly static IDictionary<Op, string> OpsToSymbols = new Dictionary<Op, string>
             {
                 {Op.Add, "+"},
@@ -67,13 +72,13 @@ namespace Countdown2
         private static IEnumerable<Tuple<IEnumerable<Value>, IEnumerable<Value>>> Unmerges(IEnumerable<Value> values)
         {
             var x = values.ElementAt(0);
-            var singletonX = new[] {x}.AsEnumerable();
+            var singletonX = new[] { x }.AsEnumerable();
 
             if (values.Take(3).Count() == 2)
             {
                 var y = values.ElementAt(1);
-                var singletonY = new[] {y}.AsEnumerable();
-                return new[] {Tuple.Create(singletonX, singletonY)};
+                var singletonY = new[] { y }.AsEnumerable();
+                return new[] { Tuple.Create(singletonX, singletonY) };
             }
 
             Func<Tuple<IEnumerable<Value>, IEnumerable<Value>>, IEnumerable<Tuple<IEnumerable<Value>, IEnumerable<Value>>>> addX =
@@ -81,13 +86,20 @@ namespace Countdown2
                 {
                     var ys = t.Item1;
                     var zs = t.Item2;
-                    return new[] {Tuple.Create(singletonX.Concat(ys), zs), Tuple.Create(ys, singletonX.Concat(zs))};
+                    return new[] { Tuple.Create(singletonX.Concat(ys), zs), Tuple.Create(ys, singletonX.Concat(zs)) };
                 };
 
             var xs = values.Skip(1);
             var firstBit = new[] { Tuple.Create(singletonX, xs) };
             var secondBit = Unmerges(xs).SelectMany(addX);
             return firstBit.Concat(secondBit);
+        }
+
+        private static bool Non(Op op, Expr e)
+        {
+            if (e is Num) return true;
+            var app = (App) e;
+            return op != app.Op;
         }
 
         private static IEnumerable<Tuple<Expr, Value>> Comb1(Expr e1, Value v1, Expr e2, Value v2)
@@ -97,7 +109,7 @@ namespace Countdown2
 
             if (1 < v1)
             {
-                yield return Tuple.Create(new App(Op.Mul, e1, e2) as Expr, v1*v2);
+                yield return Tuple.Create(new App(Op.Mul, e1, e2) as Expr, v1 * v2);
 
                 var q = v2 / v1;
                 var r = v2 % v1;
@@ -152,7 +164,7 @@ namespace Countdown2
             var x = numbers.First();
             var tail = numbers.Skip(1);
 
-            if (!tail.Any()) return new[] {Tuple.Create(new Num(x) as Expr, x)};
+            if (!tail.Any()) return new[] { Tuple.Create(new Num(x) as Expr, x) };
 
             return
                 from pair in Unmerges(numbers)
@@ -168,16 +180,16 @@ namespace Countdown2
         {
             var x = numbers.First();
             var xs = numbers.Skip(1);
-            var singletonX = new[] {x};
+            var singletonX = new[] { x };
 
             if (!xs.Any())
             {
-                return new[] {singletonX};
+                return new[] { singletonX };
             }
 
             var xss = SubSeqs(xs);
 
-            return xss.Concat(new[] {singletonX}.Concat(xss.Select(ys => singletonX.Concat(ys))));
+            return xss.Concat(new[] { singletonX }.Concat(xss.Select(ys => singletonX.Concat(ys))));
         }
 
         private static Tuple<Expr, Value> Countdown(Value n, IEnumerable<Value> numbers)
