@@ -19,17 +19,30 @@ legal Mul v1 v2 = (1 < v1) && (v1 <= v2)
 legal Div v1 v2 = (1 < v2) && (v1 `mod` v2 == 0)
 
 unmerges :: [a] -> [([a], [a])]
-unmerges [x, y] = [([x], [y]), ([y], [x])]
+unmerges [x, y] = [([x], [y])]
 unmerges (x:xs) =
-    [([x], xs), (xs, [x])] ++ concatMap (add x) (unmerges xs)
+    [([x], xs)] ++ concatMap (add x) (unmerges xs)
     where add x (ys, zs) = [(x:ys, zs), (ys, x:zs)]
 
 ops :: [Op]
 ops = [Add, Sub, Mul, Div]
 
+comb1 (e1, v1) (e2, v2) =
+    [(App Add e1 e2, v1 + v2),(App Sub e2 e1, v2 - v1)] ++
+    if 1 < v1 then [(App Mul e1 e2, v1 * v2)] ++ [(App Div e2 e1, q) | r == 0]
+    else []
+    where (q, r ) = divMod v2 v1
+
+comb2 (e1, v1) (e2, v2) =
+    [(App Add e1 e2, v1 + v2)] ++
+    if 1 < v1 then [(App Mul e1 e2, v1 * v2), (App Div e1 e2, 1)]
+    else []
+
 combine :: (Expr, Value) -> (Expr, Value) -> [(Expr, Value)]
-combine (e1, v1) (e2, v2) =
-    [ (App op e1 e2, apply op v1 v2) | op <- ops, legal op v1 v2]
+combine (e1, v1) (e2, v2)
+    | v1 < v2 = comb1 (e1, v1) (e2, v2)
+    | v1 == v2 = comb2 (e1, v1) (e2, v2)
+    | v1 > v2 = comb1 (e2, v2) (e1, v1)
 
 nearest :: Value -> [(Expr, Value)] -> (Expr, Value)
 nearest n (ev@(_, v):evs) =
