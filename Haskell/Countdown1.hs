@@ -64,5 +64,7 @@ countdown n = nearest n . concatMap mkExprs . subseqs
 
 main :: IO ()
 main = do
-    let answer = countdown 831 [1, 3, 7, 10, 25, 50]
-    putStrLn $ "answer: " ++ show answer
+    let numbers = [1, 3, 7, 10, 25, 50]
+    let answer = countdown 831 numbers
+    let numExprs = length $ concatMap mkExprs $ subseqs numbers
+    putStrLn $ "answer: " ++ show answer ++ " (" ++ show numExprs ++ ")"
