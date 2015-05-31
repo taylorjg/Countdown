@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 // ReSharper disable PossibleMultipleEnumeration
@@ -210,8 +211,11 @@ namespace Countdown1
         private static void Main()
         {
             var numbers = new[] { 1, 3, 7, 10, 25, 50 };
+            var sw = new Stopwatch();
+            sw.Start();
             var answer = Countdown(832, numbers);
-            Console.WriteLine("{0} = {1}", answer.Item1, answer.Item2);
+            sw.Stop();
+            Console.WriteLine("{0} = {1} ({2}ms)", answer.Item1, answer.Item2, sw.ElapsedMilliseconds);
         }
     }
 }
