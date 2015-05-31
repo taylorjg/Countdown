@@ -13,7 +13,7 @@ Playing around with "The _Countdown_ problem" (pearl number 20) from _Pearls of 
 * Try it in C#
     * ~~countdown1~~
     * ~~countdown2~~
-    * countdown3
+    * ~~countdown3~~
     * countdown4
     * countdown5
 * Add a GUI front end to the Haskell code - maybe in Elm ?

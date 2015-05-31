@@ -105,27 +105,47 @@ namespace Countdown3
 
         private static IEnumerable<Tuple<Expr, Value>> Comb1(Expr e1, Value v1, Expr e2, Value v2)
         {
-            yield return Tuple.Create(new App(Op.Add, e1, e2) as Expr, v1 + v2);
-            yield return Tuple.Create(new App(Op.Sub, e2, e1) as Expr, v2 - v1);
-
-            if (1 < v1)
+            if (Non(Op.Sub, e1) && Non(Op.Sub, e2))
             {
-                yield return Tuple.Create(new App(Op.Mul, e1, e2) as Expr, v1 * v2);
+                if (Non(Op.Add, e2))
+                {
+                    yield return Tuple.Create(new App(Op.Add, e1, e2) as Expr, v1 + v2);
+                }
+
+                yield return Tuple.Create(new App(Op.Sub, e2, e1) as Expr, v2 - v1);
+            }
+
+            if (1 < v1 && Non(Op.Div, e1) && Non(Op.Div, e2))
+            {
+                if (Non(Op.Mul, e2))
+                {
+                    yield return Tuple.Create(new App(Op.Mul, e1, e2) as Expr, v1 * v2);
+                }
 
                 var q = v2 / v1;
                 var r = v2 % v1;
 
-                if (r == 0) yield return Tuple.Create(new App(Op.Div, e2, e1) as Expr, q);
+                if (r == 0)
+                {
+                    yield return Tuple.Create(new App(Op.Div, e2, e1) as Expr, q);
+                }
             }
         }
 
         private static IEnumerable<Tuple<Expr, Value>> Comb2(Expr e1, Value v1, Expr e2, Value v2)
         {
-            yield return Tuple.Create(new App(Op.Add, e1, e2) as Expr, v1 + v2);
-
-            if (1 < v1)
+            if (Non(Op.Sub, e1) && Non(Op.Add, e2) && Non(Op.Sub, e2))
             {
-                yield return Tuple.Create(new App(Op.Mul, e1, e2) as Expr, v1 * v2);
+                yield return Tuple.Create(new App(Op.Add, e1, e2) as Expr, v1 + v2);
+            }
+
+            if (1 < v1 && Non(Op.Div, e1) && Non(Op.Div, e2))
+            {
+                if (Non(Op.Mul, e2))
+                {
+                    yield return Tuple.Create(new App(Op.Mul, e1, e2) as Expr, v1 * v2);
+                }
+
                 yield return Tuple.Create(new App(Op.Div, e1, e2) as Expr, 1);
             }
         }
