@@ -1,6 +1,14 @@
+import Data.Maybe (fromJust)
+
 type Value = Int
-data Expr = Num Value | App Op Expr Expr deriving Show
-data Op = Add | Sub | Mul | Div deriving (Show, Eq)
+data Expr = Num Value | App Op Expr Expr
+data Op = Add | Sub | Mul | Div deriving Eq
+
+instance Show Expr where
+    show (Num x) = show x
+    show (App op e1 e2) = "(" ++ show e1 ++ (fromJust $ lookup op opSymbols) ++ show e2 ++ ")"
+        where
+            opSymbols = [(Add, "+"), (Sub, "-"), (Mul, "*"), (Div, "/")]
 
 unmerges :: [a] -> [([a], [a])]
 unmerges [x, y] = [([x], [y])]
@@ -69,5 +77,4 @@ main :: IO ()
 main = do
     let numbers = [1, 3, 7, 10, 25, 50]
     let answer = countdown 831 numbers
-    let numExprs = length $ concatMap mkExprs $ subseqs numbers
-    putStrLn $ "answer: " ++ show answer ++ " (" ++ show numExprs ++ ")"
+    putStrLn $ show (fst answer) ++ " = " ++ show (snd answer)
