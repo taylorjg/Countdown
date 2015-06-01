@@ -19,14 +19,74 @@ Playing around with "The _Countdown_ problem" (pearl number 20) from _Pearls of 
 * Add a GUI front end to the Haskell code - maybe in Elm ?
 * Add a GUI front end to the C# code - maybe in WPF ?
 
-## Remarks
+## Porting to C# from Haskell
 
 I encountered a problem when porting the code to C#. It ran for ages without giving a result.
-The problem seemed to be in the <code>Nearest</code> function. Eventually, I re-implemented this function using a simple loop and it then worked fine - in fact, it ran really quickly. I think the problem may be that the Haskell version of <code>Nearest</code> uses a helper function called <code>Search</code> which is tail recursive. I suspect that C# does not optimise tail calls. I'm not sure whether this accounts for the problem that I was seeing.
+The problem was with <code>Nearest</code> / <code>Search</code>. I was using <code>Skip(1)</code>
+in a couple of places to get the tail of the enumerable of <code>Tuple&lt;Expr, Value&gt;</code>.
+I think this was causing multiple enumerations which was dreadful for performance.
+I changed the implementation to directly use an enumerator and this fixed the problem in Countdown3:
 
-Here is a screenshot of the C# version of Countdown2:
+```C#
+private static Tuple<Expr, Value> Nearest(Value n, IEnumerable<Tuple<Expr, Value>> evs)
+{
+    using (var e = evs.GetEnumerator())
+    {
+        e.MoveNext();
+        var evsHead = e.Current;
+        var v = evsHead.Item2;
+        var d = Math.Abs(n - v);
+        return (d == 0) ? evsHead : Search(n, d, evsHead, e);
+    }
+}
 
-![Countdown2 (C#)](https://raw.githubusercontent.com/taylorjg/Countdown/master/Images/Countdown2_CSharp_Screenshot.png "Countdown2 (C#)")
+private static Tuple<Expr, Value> Search(Value n, Value d, Tuple<Expr, Value> ev, IEnumerator<Tuple<Expr, Value>> e)
+{
+    if (!e.MoveNext())
+    {
+        return ev;
+    }
+
+    var evsHead = e.Current;
+    var v = evsHead.Item2;
+    var ddash = Math.Abs(n - v);
+    if (ddash == 0) return evsHead;
+    if (ddash < d) return Search(n, ddash, evsHead, e);
+    return Search(n, d, ev, e);
+}
+```
+
+However, in Countdown1 and Countdown2, it caused a <code>StackOverflowException</code> due to the recursion in <code>Search</code>.
+For Countdown1, the stack overflow occurred in both Debug and Release builds.
+For Countdown2, the stack overflow occurred in Debug build but not in Release build.
+I'm guessing that the stack frames are smaller in Release build so more of them fit into the available stack space.
+Anyway, I changed the implementation of <code>Nearest</code> to use a simple loop instead.
+This fixed the problem although it did not run any quicker.
+
+```C#
+private static Tuple<Expr, Value> Nearest(Value n, IEnumerable<Tuple<Expr, Value>> evs)
+{
+    Tuple<Expr, Value> result = null;
+    var currentBestDiff = int.MaxValue;
+
+    foreach (var ev in evs)
+    {
+        var thisDiff = Math.Abs(n - ev.Item2);
+        if (thisDiff == 0) return ev;
+        if (thisDiff < currentBestDiff)
+        {
+            currentBestDiff = thisDiff;
+            result = ev;
+        }
+    }
+
+    return result;
+}
+```
+
+Here is a screenshot of the C# version of Countdown3:
+
+![Countdown3 (C#)](https://raw.githubusercontent.com/taylorjg/Countdown/master/Images/Countdown3_CSharp_Screenshot.png "Countdown3 (C#)")
 
 ## Links
 
