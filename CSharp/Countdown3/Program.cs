@@ -161,23 +161,43 @@ namespace Countdown3
             return Comb1(e2, v2, e1, v1);
         }
 
+        // nearest :: Value -> [(Expr, Value)] -> (Expr, Value)
+        // nearest n (ev@(_, v):evs) =
+        //     if d == 0 then ev
+        //     else search n d ev evs
+        //     where d = abs (n - v)
         private static Tuple<Expr, Value> Nearest(Value n, IEnumerable<Tuple<Expr, Value>> evs)
         {
-            Tuple<Expr, Value> result = null;
-            var currentBestDiff = int.MaxValue;
+            var evsHead = evs.First();
+            var evsTail = evs.Skip(1);
+            var v = evsHead.Item2;
+            var d = Math.Abs(n - v);
+            return (d == 0) ? evsHead : Search(n, d, evsHead, evsTail);
+        }
 
-            foreach (var ev in evs)
+        // search :: Value -> Value -> (Expr, Value) -> [(Expr, Value)] -> (Expr, Value)
+        // search _ _ ev [] = ev
+        // search n d ev ((e, v):evs)
+        //     | d' == 0 = (e, v)
+        //     | d' < d = search n d' (e, v) evs
+        //     | d' >= d = search n d ev evs
+        //     where d' = abs (n - v)
+        private static Tuple<Expr, Value> Search(Value n, Value d, Tuple<Expr, Value> ev, IEnumerable<Tuple<Expr, Value>> evs)
+        {
+            var evsHead = evs.FirstOrDefault();
+
+            if (evsHead == null)
             {
-                var thisDiff = Math.Abs(n - ev.Item2);
-                if (thisDiff == 0) return ev;
-                if (thisDiff < currentBestDiff)
-                {
-                    currentBestDiff = thisDiff;
-                    result = ev;
-                }
+                return ev;
             }
 
-            return result;
+
+            var evsTail = evs.Skip(1);
+            var v = evsHead.Item2;
+            var ddash = Math.Abs(n - v);
+            if (ddash == 0) return evsHead;
+            if (ddash < d) return Search(n, ddash, evsHead, evsTail);
+            return Search(n, d, ev, evsTail);
         }
 
         private static IEnumerable<Tuple<Expr, Value>> MkExpr(IEnumerable<Value> numbers)
