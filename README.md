@@ -84,7 +84,10 @@ private static Tuple<Expr, Value> Nearest(Value n, IEnumerable<Tuple<Expr, Value
 }
 ```
 
-Here is a screenshot of the C# version of Countdown3:
+Here is a screenshot of the C# version of Countdown3 when:
+
+* the input numbers are <code>1, 3, 7, 10, 25, 50</code>
+* the target is <code>831</code> (there is no exact solution - the best answer is <code>832</code>)
 
 ![Countdown3 (C#)](https://raw.githubusercontent.com/taylorjg/Countdown/master/Images/Countdown3_CSharp_Screenshot.png "Countdown3 (C#)")
 

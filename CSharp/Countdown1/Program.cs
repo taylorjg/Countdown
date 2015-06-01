@@ -213,7 +213,7 @@ namespace Countdown1
             var numbers = new[] { 1, 3, 7, 10, 25, 50 };
             var sw = new Stopwatch();
             sw.Start();
-            var answer = Countdown(832, numbers);
+            var answer = Countdown(831, numbers);
             sw.Stop();
             Console.WriteLine("{0} = {1} ({2}ms)", answer.Item1, answer.Item2, sw.ElapsedMilliseconds);
         }
